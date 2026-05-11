@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الدوري الرياضي للجالية اليمنية بحائل 🇾🇪</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0b0b;
+            --card-bg: rgba(25, 25, 25, 0.8);
+            --text-main: #ffffff;
+            --yemen-red: #CE1126;
+            --yemen-white: #ffffff;
+            --yemen-black: #000000;
+            --neon-red: #ff3131;
+            --accent: #ff3131;
+            --glass: rgba(255, 255, 255, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --glass: rgba(0, 0, 0, 0.05);
+            --accent: #ce1126;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: var(--transition);
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+
+        /* Neon UI Elements */
+        .neon-border { border: 1px solid var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .neon-text { text-shadow: 0 0 5px var(--accent); }
+
+        header {
+            position: sticky; top: 0; z-index: 1000;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--yemen-red);
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-area img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--yemen-red); }
+        /* Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; height: 70px;
+            background: var(--card-bg); backdrop-filter: blur(15px);
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid var(--glass); z-index: 1000;
+        }
+        .nav-item { color: var(--text-main); text-decoration: none; font-size: 12px; display: flex; flex-direction: column; align-items: center; opacity: 0.6; cursor: pointer; }
+        .nav-item.active { opacity: 1; color: var(--yemen-red); transform: translateY(-5px); transition: 0.3s; }
+
+        /* Floating Admin Button */
+        .admin-floating-btn {
+            position: fixed;
+            bottom: 85px;
+            left: 20px;
+            background: var(--yemen-red);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 999;
+            cursor: pointer;
+            border: none;
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+        .admin-floating-btn:hover {
+            transform: scale(1.1);
+            background: var(--accent);
+        }
+
+        /* Sections */
+        section { display: none; padding: 20px; animation: fadeIn 0.5s ease; max-width: 1200px; margin: 0 auto; }
+        section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Grids */
+        .card {
+            background: var(--card-bg); border-radius: 15px; padding: 15px; margin-bottom: 15px;
+            border: 1px solid var(--glass); transition: var(--transition);
+        }
+        .card:hover { transform: scale(1.02); border-color: var(--yemen-red); }
+
+        .match-grid { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; text-align: center; gap: 10px; }
+        .team-logo { width: 60px; height: 60px; object-fit: cover; border-radius: 50%; background: #eee; margin-bottom: 5px; }
+        /* Standings Table */
+        .table-container { overflow-x: auto; border-radius: 10px; background: var(--card-bg); }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
+        th { background: var(--yemen-red); color: white; padding: 12px; white-space: nowrap; }
+        td { padding: 12px; border-bottom: 1px solid var(--glass); white-space: nowrap; }
+        tr:nth-child(even) { background: var(--glass); }
+
+        /* Admin Forms */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea {
+            width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--glass);
+            background: rgba(255,255,255,0.1); color: var(--text-main);
+        }
+        button {
+            padding: 12px 20px; border-radius: 8px; border: none; cursor: pointer;
+            font-weight: bold; transition: var(--transition);
+        }
+        .btn-primary { background: var(--yemen-red); color: white; width: 100%; }
+        .btn-secondary { background: #333; color: white; }
+        .btn-danger { background: #ff4444; color: white; }
+
+        /* Admin CRUD Actions design */
+        .admin-actions { display: flex; gap: 5px; margin-top: 10px; justify-content: flex-end; flex-wrap: wrap; }
+        .btn-edit { background: #f39c12; color: white; padding: 6px 12px; font-size: 12px; border-radius: 5px; }
+        .btn-delete { background: #e74c3c; color: white; padding: 6px 12px; font-size: 12px; border-radius: 5px; }
+
+        /* Sponsors */
+        .sponsors-track { display: flex; overflow-x: auto; gap: 20px; padding: 10px; white-space: nowrap; scrollbar-width: none; align-items: center; }
+        .sponsor-img { height: 50px; opacity: 0.7; transition: 0.3s; object-fit: contain; }
+        .sponsor-img:hover { opacity: 1; }
+
+        .loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-color); display: flex; justify-content: center;
+            align-items: center; z-index: 3000;
+        }
+        .spinner { width: 50px; height: 50px; border: 5px solid var(--glass); border-top: 5px solid var(--yemen-red); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .footer-dev { padding: 20px; text-align: center; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div id="loader" class="loader"><div class="spinner"></div></div>
+
+    <header>
+        <div class="logo-area">
+            <img src="https://i.ibb.co/3Y7yvHk/ball.png" alt="Logo">
+            <h2 style="font-size: 1.1rem;" class="neon-text">دوري الجالية اليمنية - حائل 🇾🇪</h2>
+        </div>
+        <button onclick="toggleTheme()" id="theme-btn" style="background:none; font-size: 1.5rem;">🌙</button>
+    </header>
+    <button class="admin-floating-btn" onclick="showSection('admin-login')" title="لوحة التحكم">🔐</button>
+
+    <section id="home" class="active">
+        <h3 class="neon-text">الرعاة الرسميون</h3>
+        <div class="sponsors-track" id="sponsors-list"></div>
+
+        <h3 class="neon-text" style="margin: 20px 0 10px;">المباريات القادمة</h3>
+        <div id="upcoming-matches-container"></div>
+
+        <h3 class="neon-text" style="margin: 20px 0 10px;">نتائج الجولة الحالية</h3>
+        <div id="finished-matches-container"></div>
+    </section>
+
+    <section id="standings">
+        <h2 class="neon-text">جدول الترتيب</h2>
+        <div style="margin-bottom: 30px;">
+            <h3 style="color: var(--yemen-red);">المجموعة الأولى</h3>
+            <div class="table-container" id="group1-table"></div>
+        </div>
+        <div>
+            <h3 style="color: var(--yemen-red);">المجموعة الثانية</h3>
+            <div class="table-container" id="group2-table"></div>
+        </div>
+    </section>
+
+    <section id="scorers">
+        <h2 class="neon-text">قائمة الهدافين</h2>
+        <div class="table-container" id="scorers-table"></div>
+    </section>
+
+    <section id="admin-login">
+        <div class="card" style="max-width: 400px; margin: 100px auto;">
+            <h2 style="text-align:center;">دخول المشرف</h2>
+            <div class="form-group">
+                <label>اسم المستخدم</label>
+                <input type="text" id="admin-user">
+            </div>
+            <div class="form-group">
+                <label>كلمة المرور</label>
+                <input type="password" id="admin-pass">
+            </div>
+            <button class="btn-primary" onclick="handleLogin()">دخول</button>
+        </div>
+    </section>
+    <section id="admin-dash">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="neon-text">لوحة التحكم</h2>
+            <button class="btn-danger" onclick="logout()">خروج</button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="card btn-secondary" onclick="showAdminSection('admin-upcoming')">المباريات القادمة</button>
+            <button class="card btn-secondary" onclick="showAdminSection('admin-finished')">المباريات المنتهية</button>
+            <button class="card btn-secondary" onclick="showAdminSection('admin-teams')">الفرق والترتيب</button>
+            <button class="card btn-secondary" onclick="showAdminSection('admin-scorers-list')">الهدافين</button>
+            <button class="card btn-secondary" onclick="showAdminSection('admin-sponsors-section')">الرعاة</button>
+            <button class="card btn-secondary" onclick="showAdminSection('admin-config-section')">إعدادات الشعار</button>
+        </div>
+
+        <div id="admin-upcoming" class="admin-sub" style="display:none; margin-top:20px;">
+            <h3>إضافة مباراة قادمة</h3>
+            <div class="card">
+                <input type="hidden" id="edit-id-upcoming">
+                <input type="text" id="up-t1" placeholder="اسم الفريق 1">
+                <input type="file" id="up-l1" accept="image/*" class="img-input">
+                <input type="text" id="up-t2" placeholder="اسم الفريق 2">
+                <input type="file" id="up-l2" accept="image/*" class="img-input">
+                <input type="date" id="up-date">
+                <input type="time" id="up-time">
+                <button class="btn-primary" onclick="saveUpcomingMatch()">حفظ المباراة</button>
+            </div>
+            <div id="admin-list-upcoming"></div>
+        </div>
+        <div id="admin-finished" class="admin-sub" style="display:none; margin-top:20px;">
+            <h3>إضافة نتيجة مباراة</h3>
+            <div class="card">
+                <input type="hidden" id="edit-id-finished">
+                <input type="text" id="fin-t1" placeholder="الفريق الأول">
+                <input type="text" id="fin-s1" placeholder="أهداف الفريق 1">
+                <input type="text" id="fin-t2" placeholder="الفريق الثاني">
+                <input type="text" id="fin-s2" placeholder="أهداف الفريق 2">
+                <textarea id="fin-timeline" placeholder="الأحداث (لاعب دقيقة، لاعب دقيقة)"></textarea>
+                <button class="btn-primary" onclick="saveFinishedMatch()">حفظ النتيجة</button>
+            </div>
+            <div id="admin-list-finished"></div>
+        </div>
+        <div id="admin-teams" class="admin-sub" style="display:none; margin-top:20px;">
+            <h3>إدارة الفرق</h3>
+            <div class="card">
+                <input type="hidden" id="edit-id-team">
+                <input type="text" id="team-name" placeholder="اسم الفريق">
+                <select id="team-group"><option value="1">المجموعة 1</option><option value="2">المجموعة 2</option></select>
+                <input type="number" id="team-p" placeholder="نقاط">
+                <input type="number" id="team-g" placeholder="أهداف له">
+                <input type="number" id="team-pl" placeholder="لعب">
+                <input type="number" id="team-w" placeholder="فوز">
+                <input type="number" id="team-d" placeholder="تعادل">
+                <input type="number" id="team-l" placeholder="خسارة">
+                <label>شعار الفريق</label>
+                <input type="file" id="team-logo-file" accept="image/*">
+                <label>قائمة اللاعبين (اسم اللاعب : الحالة) (كل لاعب في سطر جديد)</label>
+                <textarea id="team-players-text" placeholder="أحمد محمد : جاهز&#10;خالد حسن : مصاب&#10;علي سعيد : موقوف" rows="6"></textarea>
+                <button class="btn-primary" onclick="saveStanding()">حفظ الفريق</button>
+            </div>
+            <div id="admin-list-standings"></div>
+        </div>
+
+        <div id="admin-scorers-list" class="admin-sub" style="display:none; margin-top:20px;">
+            <h3>إدارة الهدافين</h3>
+            <div class="card">
+                <input type="hidden" id="edit-id-scorer">
+                <input type="text" id="scorer-name" placeholder="اسم اللاعب">
+                <input type="text" id="scorer-team" placeholder="اسم الفريق">
+                <input type="number" id="scorer-goals" placeholder="عدد الأهداف">
+                <button class="btn-primary" onclick="saveScorer()">حفظ الهداف</button>
+            </div>
+            <div id="admin-list-scorers"></div>
+        </div>
+
+        <div id="admin-sponsors-section" class="admin-sub" style="display:none; margin-top:20px;">
+            <h3>إضافة راعي رسمي جديد</h3>
+            <div class="card">
+                <input type="text" id="sponsor-name" placeholder="اسم الراعي">
+                <input type="file" id="sponsor-logo-file" accept="image/*">
+                <button class="btn-primary" onclick="saveSponsor()">إضافة راعي</button>
+            </div>
+            <div id="admin-list-sponsors"></div>
+        </div>
+
+        <div id="admin-config-section" class="admin-sub" style="display:none; margin-top:20px;">
+            <h3>شعار واجهة الموقع</h3>
+            <div class="card">
+                <img id="site-logo-img" src="https://i.ibb.co/3Y7yvHk/ball.png" style="width: 80px; height: 80px; display: block; margin: 10px auto; border-radius: 50%;">
+                <input type="file" id="site-logo-file" accept="image/*">
+                <button class="btn-primary" onclick="saveSiteLogo()" style="margin-top:10px;">تغيير الشعار الرئيسي</button>
+            </div>
+        </div>
+    </section>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showSection('home', this)"><span>🏠</span><span>الرئيسية</span></div>
+        <div class="nav-item" onclick="showSection('standings', this)"><span>📊</span><span>الترتيب</span></div>
+        <div class="nav-item" onclick="showSection('scorers', this)"><span>⚽</span><span>الهدافين</span></div>
+    </nav>
+
+    <footer class="footer-dev">
+        <button class="btn-secondary" onclick="window.location.href='https://wa.me/966574360046'">
+        تواصل مع مطور الموقع:  📲</button>
+    </footer>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-analytics.js";
+
+        // إعدادات Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBEBFoiLGEz934SXbcp1BMcChgHkjtOuZE",
+            authDomain: "gali100.firebaseapp.com",
+            projectId: "gali100",
+            storageBucket: "gali100.firebasestorage.app",
+            messagingSenderId: "669573322220",
+            appId: "1:669573322220:web:fa8aac39cf9d04f19c9cc9",
+            measurementId: "G-F56754GGMB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+
+        // القوائم العالمية
+        let allTeamsGlobal = [];
+        let allScorersGlobal = [];
+        let allSponsorsGlobal = [];
+
+        // متغيرات مؤقتة للشعار عند التعديل
+        let tempTeamLogo = "";
+        let tempUpLogo1 = "";
+        let tempUpLogo2 = "";
+
+        // تحويل الصور إلى Base64
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        // تبديل المظهر (ليلي / نهاري)
+        window.toggleTheme = () => {
+            const body = document.body;
+            const isDark = body.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-btn').innerText = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', newTheme);
+        };
+
+        // الانتقال بين الأقسام
+        window.showSection = (id, el) => {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(el) {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                el.classList.add('active');
+            } else {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            }
+        };
+
+        window.showAdminSection = (id) => {
+            document.querySelectorAll('.admin-sub').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        };
+
+        // تسجيل الدخول للإدارة
+        window.handleLogin = () => {
+            const user = document.getElementById('admin-user').value;
+            const pass = document.getElementById('admin-pass').value;
+            if(user === 'developer' && pass === 'dark65') {
+                showSection('admin-dash');
+                localStorage.setItem('isAdmin', 'true');
+            } else {
+                alert('خطأ في البيانات');
+            }
+        };
+
+        window.logout = () => {
+            localStorage.removeItem('isAdmin');
+            showSection('home');
+        };
+        // معالجة نصوص قائمة اللاعبين
+        function parsePlayersInput(text) {
+            if(!text.trim()) return [];
+            const lines = text.split('\n');
+            const players = [];
+            lines.forEach(line => {
+                if(line.includes(':')) {
+                    const parts = line.split(':');
+                    const name = parts[0].trim();
+                    const statusText = parts[1].trim();
+                    let status = 'ready';
+                    if(statusText === 'مصاب') status = 'injured';
+                    if(statusText === 'موقوف') status = 'suspended';
+                    players.push({
+                        name: name,
+                        status: status,
+                        img: 'https://i.ibb.co/3Y7yvHk/ball.png'
+                    });
+                }
+            });
+            return players;
+        }
+
+        function formatPlayersToText(players) {
+            if(!players || players.length === 0) return "";
+            return players.map(p => {
+                let statusText = "جاهز";
+                if(p.status === 'injured') statusText = "مصاب";
+                if(p.status === 'suspended') statusText = "موقوف";
+                return `${p.name}:${statusText}`;
+            }).join('\n');
+        }
+
+        function fillTeamSelectors(teams) {
+            const dropdowns = document.querySelectorAll('.team-dropdown-selector');
+            dropdowns.forEach(dropdown => {
+                const prevVal = dropdown.value;
+                dropdown.innerHTML = teams.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
+                if(prevVal) dropdown.value = prevVal;
+            });
+        }
+
+        // إدارة الفرق (قاعدة بيانات الترتيب)
+        window.saveStanding = async () => {
+            const id = document.getElementById('edit-id-team').value;
+            const nameInput = document.getElementById('team-name').value.trim();
+            const file = document.getElementById('team-logo-file').files[0];
+            let logo = file ? await toBase64(file) : tempTeamLogo;
+            const playersText = document.getElementById('team-players-text').value;
+            const playersArray = parsePlayersInput(playersText);
+
+            if(!nameInput) return alert('أدخل اسم الفريق');
+
+            // فحص تكرار اسم الفريق (فقط عند إضافة فريق جديد وليس عند تعديل فريق قائم)
+            if (!id) {
+                const nameExists = allTeamsGlobal.some(t => t.name.trim().toLowerCase() === nameInput.toLowerCase());
+                if (nameExists) {
+                    return alert('هذا الفريق موجود بالفعل! يرجى استخدام اسم آخر.');
+                }
+            }
+
+            const data = {
+                name: nameInput,
+                group: document.getElementById('team-group').value,
+                p: parseInt(document.getElementById('team-p').value) || 0,
+                g: parseInt(document.getElementById('team-g').value) || 0,
+                pl: parseInt(document.getElementById('team-pl').value) || 0,
+                w: parseInt(document.getElementById('team-w').value) || 0,
+                d: parseInt(document.getElementById('team-d').value) || 0,
+                l: parseInt(document.getElementById('team-l').value) || 0,
+                logo: logo,
+                players: playersArray
+            };
+
+            if (id) {
+                await updateDoc(doc(db, "standings", id), data);
+                alert('تم التحديث بنجاح');
+            } else {
+                await addDoc(collection(db, "standings"), data);
+                alert('تم الحفظ بنجاح');
+            }
+            resetStandingForm();
+        };
+
+        window.editStanding = (id, name, group, p, g, pl, w, d, l, logo) => {
+            document.getElementById('edit-id-team').value = id;
+            document.getElementById('team-name').value = name;
+            document.getElementById('team-group').value = group;
+            document.getElementById('team-p').value = p;
+            document.getElementById('team-g').value = g;
+            document.getElementById('team-pl').value = pl;
+            document.getElementById('team-w').value = w;
+            document.getElementById('team-d').value = d;
+            document.getElementById('team-l').value = l;
+            tempTeamLogo = logo || "";
+
+            const team = allTeamsGlobal.find(t => t.id === id);
+            if (team && team.players) {
+                document.getElementById('team-players-text').value = formatPlayersToText(team.players);
+            } else {
+                document.getElementById('team-players-text').value = "";
+            }
+            alert('تم جلب البيانات، يمكنك تعديلها وحفظها الآن.');
+        };
+
+        window.deleteStanding = async (id) => {
+            if(confirm('هل أنت متأكد من رغبتك في حذف هذا الفريق؟')) {
+                await deleteDoc(doc(db, "standings", id));
+                alert('تم الحذف');
+            }
+        };
+
+        function resetStandingForm() {
+            document.getElementById('edit-id-team').value = '';
+            document.getElementById('team-name').value = '';
+            document.getElementById('team-p').value = '';
+            document.getElementById('team-g').value = '';
+            document.getElementById('team-pl').value = '';
+            document.getElementById('team-w').value = '';
+            document.getElementById('team-d').value = '';
+            document.getElementById('team-l').value = '';
+            document.getElementById('team-logo-file').value = '';
+            document.getElementById('team-players-text').value = '';
+            tempTeamLogo = "";
+        }
+        // إدارة الهدافين
+        window.saveScorer = async () => {
+            const id = document.getElementById('edit-id-scorer').value;
+            const scorerName = document.getElementById('scorer-name').value.trim();
+            const data = {
+                name: scorerName,
+                team: document.getElementById('scorer-team').value,
+                goals: parseInt(document.getElementById('scorer-goals').value) || 0
+            };
+
+            if(!data.name || !data.team) return alert('أدخل بيانات الهداف كاملة');
+
+            // فحص تكرار الهداف
+            if(!id) {
+                const scorerExists = allScorersGlobal.some(s => s.name.trim().toLowerCase() === scorerName.toLowerCase());
+                if(scorerExists) {
+                    return alert('هذا الهداف مسجل بالفعل! يرجى استخدام اسم آخر.');
+                }
+            }
+
+            if(id) {
+                await updateDoc(doc(db, "scorers", id), data);
+                alert('تم تحديث الهداف');
+            } else {
+                await addDoc(collection(db, "scorers"), data);
+                alert('تمت إضافة الهداف');
+            }
+            resetScorerForm();
+        };
+
+        window.editScorer = (id, name, team, goals) => {
+            document.getElementById('edit-id-scorer').value = id;
+            document.getElementById('scorer-name').value = name;
+            document.getElementById('scorer-team').value = team;
+            document.getElementById('scorer-goals').value = goals;
+            alert('تم جلب بيانات الهداف للتعديل');
+        };
+
+        window.deleteScorer = async (id) => {
+            if(confirm('هل تريد حذف هذا الهداف؟')) {
+                await deleteDoc(doc(db, "scorers", id));
+                alert('تم الحذف');
+            }
+        };
+
+        function resetScorerForm() {
+            document.getElementById('edit-id-scorer').value = '';
+            document.getElementById('scorer-name').value = '';
+            document.getElementById('scorer-team').value = '';
+            document.getElementById('scorer-goals').value = '';
+        }
+
+        // إدارة المباريات القادمة
+        window.saveUpcomingMatch = async () => {
+            const id = document.getElementById('edit-id-upcoming').value;
+            const l1File = document.getElementById('up-l1').files[0];
+            const l2File = document.getElementById('up-l2').files[0];
+            const data = {
+                team1: document.getElementById('up-t1').value,
+                team2: document.getElementById('up-t2').value,
+                date: document.getElementById('up-date').value,
+                time: document.getElementById('up-time').value,
+                logo1: l1File ? await toBase64(l1File) : tempUpLogo1,
+                logo2: l2File ? await toBase64(l2File) : tempUpLogo2
+            };
+
+            if(!data.team1 || !data.team2) return alert('يرجى ملء الحقول المطلوبة');
+
+            if(id) {
+                await updateDoc(doc(db, "upcoming_matches", id), data);
+                alert('تم تحديث المباراة');
+            } else {
+                await addDoc(collection(db, "upcoming_matches"), data);
+                alert('تمت إضافة المباراة');
+            }
+            resetUpcomingForm();
+        };
+
+        window.editUpcoming = (id, t1, t2, date, time, logo1, logo2) => {
+            document.getElementById('edit-id-upcoming').value = id;
+            document.getElementById('up-t1').value = t1;
+            document.getElementById('up-t2').value = t2;
+            document.getElementById('up-date').value = date;
+            document.getElementById('up-time').value = time;
+            tempUpLogo1 = logo1 || "";
+            tempUpLogo2 = logo2 || "";
+            alert('تم جلب بيانات المباراة للتعديل');
+        };
+
+        window.deleteUpcoming = async (id) => {
+            if(confirm('هل تريد حذف هذه المباراة؟')) {
+                await deleteDoc(doc(db, "upcoming_matches", id));
+                alert('تم الحذف');
+            }
+        };
+
+        function resetUpcomingForm() {
+            document.getElementById('edit-id-upcoming').value = '';
+            document.getElementById('up-t1').value = '';
+            document.getElementById('up-t2').value = '';
+            document.getElementById('up-date').value = '';
+            document.getElementById('up-time').value = '';
+            document.getElementById('up-l1').value = '';
+            document.getElementById('up-l2').value = '';
+            tempUpLogo1 = "";
+            tempUpLogo2 = "";
+        }
+
+        // إدارة المباريات المنتهية
+        window.saveFinishedMatch = async () => {
+            const id = document.getElementById('edit-id-finished').value;
+            const data = {
+                team1: document.getElementById('fin-t1').value,
+                score1: document.getElementById('fin-s1').value,
+                team2: document.getElementById('fin-t2').value,
+                score2: document.getElementById('fin-s2').value,
+                timeline: document.getElementById('fin-timeline').value
+            };
+
+            if(!data.team1 || !data.team2) return alert('يرجى ملء البيانات كاملة');
+
+            if(id) {
+                await updateDoc(doc(db, "finished_matches", id), data);
+                alert('تم تحديث نتيجة المباراة');
+            } else {
+                await addDoc(collection(db, "finished_matches"), data);
+                alert('تم حفظ النتيجة');
+            }
+            resetFinishedForm();
+        };
+
+        window.editFinished = (id, t1, s1, t2, s2, timeline) => {
+            document.getElementById('edit-id-finished').value = id;
+            document.getElementById('fin-t1').value = t1;
+            document.getElementById('fin-s1').value = s1;
+            document.getElementById('fin-t2').value = t2;
+            document.getElementById('fin-s2').value = s2;
+            document.getElementById('fin-timeline').value = timeline;
+            alert('تم جلب النتيجة للتعديل');
+        };
+
+        window.deleteFinished = async (id) => {
+            if(confirm('هل تريد حذف نتيجة هذه المباراة؟')) {
+                await deleteDoc(doc(db, "finished_matches", id));
+                alert('تم الحذف');
+            }
+        };
+
+        function resetFinishedForm() {
+            document.getElementById('edit-id-finished').value = '';
+            document.getElementById('fin-t1').value = '';
+            document.getElementById('fin-s1').value = '';
+            document.getElementById('fin-t2').value = '';
+            document.getElementById('fin-s2').value = '';
+            document.getElementById('fin-timeline').value = '';
+        }
+        // إدارة الرعاة الرسميين
+        window.saveSponsor = async () => {
+            const name = document.getElementById('sponsor-name').value.trim();
+            const file = document.getElementById('sponsor-logo-file').files[0];
+            if(!name) return alert('يرجى كتابة اسم الراعي');
+
+            // فحص تكرار اسم الراعي
+            const sponsorExists = allSponsorsGlobal.some(s => s.name.trim().toLowerCase() === name.toLowerCase());
+            if (sponsorExists) {
+                return alert('هذا الراعي مضاف بالفعل! يرجى استخدام اسم آخر.');
+            }
+
+            let logo = file ? await toBase64(file) : '';
+
+            const data = {
+                name: name,
+                logo: logo
+            };
+
+            await addDoc(collection(db, "sponsors"), data);
+            alert('تمت إضافة الراعي بنجاح');
+            document.getElementById('sponsor-name').value = '';
+            document.getElementById('sponsor-logo-file').value = '';
+        };
+
+        window.deleteSponsor = async (id) => {
+            if(confirm('هل تريد حذف هذا الراعي؟')) {
+                await deleteDoc(doc(db, "sponsors", id));
+                alert('تم الحذف بنجاح');
+            }
+        };
+
+        // إدارة شعار الموقع
+        window.saveSiteLogo = async () => {
+            const file = document.getElementById('site-logo-file').files[0];
+            if(!file) return alert('يرجى اختيار صورة أولاً');
+            const logoBase64 = await toBase64(file);
+            
+            await setDoc(doc(db, "site_config", "main"), { logo: logoBase64 });
+            document.getElementById('site-logo-img').src = logoBase64;
+            alert('تم تحديث شعار الموقع بنجاح');
+        };
+
+        // مزامنة البيانات والفرز الفوري
+        const loadRealTimeData = () => {
+            // معالجة وفرز الترتيب: النقاط أولاً ثم الأهداف في حال التعادل
+            onSnapshot(collection(db, "standings"), (snapshot) => {
+                const teams = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                allTeamsGlobal = teams; 
+                fillTeamSelectors(teams);
+                renderStandingsTable(teams);
+                renderAdminStandingsList(teams);
+            });
+
+            onSnapshot(collection(db, "upcoming_matches"), (snapshot) => {
+                const matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                renderUpcoming(matches);
+                renderAdminUpcomingList(matches);
+            });
+
+            onSnapshot(collection(db, "finished_matches"), (snapshot) => {
+                const matches = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                renderFinished(matches);
+                renderAdminFinishedList(matches);
+            });
+
+            onSnapshot(collection(db, "scorers"), (snapshot) => {
+                const scorers = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                allScorersGlobal = scorers;
+                renderScorersTable(scorers);
+                renderAdminScorersList(scorers);
+            });
+
+            onSnapshot(collection(db, "sponsors"), (snapshot) => {
+                const sponsors = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                allSponsorsGlobal = sponsors;
+                renderSponsorsTrack(sponsors);
+                renderAdminSponsorsList(sponsors);
+            });
+
+            onSnapshot(collection(db, "site_config"), (snapshot) => {
+                snapshot.forEach(doc => {
+                    if (doc.id === "main" && doc.data().logo) {
+                        document.getElementById('site-logo-img').src = doc.data().logo;
+                    }
+                });
+            });
+        };
+
+        // بناء وعرض جدول الترتيب بالاعتماد على الفرز الجديد (النقاط ثم الأهداف)
+        function renderStandingsTable(teams) {
+            const renderGroup = (groupNum) => {
+                const filtered = teams.filter(t => t.group == groupNum)
+                    .sort((a, b) => b.p - a.p || b.g - a.g); // فرز ذكي: النقاط أولاً ثم فارق الأهداف عند التعادل
+                
+                let html = `<table><thead><tr><th>الفريق</th><th>لعب</th><th>فوز</th><th>تعادل</th><th>خسارة</th><th>له</th><th>النقاط</th></tr></thead><tbody>`;
+                filtered.forEach(t => {
+                    html += `<tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:5px; justify-content:center;">
+                                <img src="${t.logo || 'https://i.ibb.co/3Y7yvHk/ball.png'}" style="width:25px; height:25px; border-radius:50%"> ${t.name}
+                            </div>
+                        </td>
+                        <td>${t.pl}</td>
+                        <td>${t.w}</td>
+                        <td>${t.d}</td>
+                        <td>${t.l}</td>
+                        <td>${t.g}</td>
+                        <td style="font-weight:bold; color:var(--yemen-red)">${t.p}</td>
+                    </tr>`;
+                });
+                html += `</tbody></table>`;
+                return html;
+            };
+            document.getElementById('group1-table').innerHTML = renderGroup(1);
+            document.getElementById('group2-table').innerHTML = renderGroup(2);
+        }
+
+        function renderFinished(matches) {
+            const container = document.getElementById('finished-matches-container');
+            container.innerHTML = matches.map(m => m.team1 ? `
+                <div class="card">
+                    <div class="match-grid">
+                        <div><strong>${m.team1}</strong></div>
+                        <div style="font-size:1.5rem; color:var(--yemen-red)">${m.score1} - ${m.score2}</div>
+                        <div><strong>${m.team2}</strong></div>
+                    </div>
+                    <div style="font-size:0.8rem; margin-top:10px; opacity:0.8; text-align:center;">
+                        ${m.timeline}
+                    </div>
+                </div>
+            ` : '').join('');
+        }
+
+        function renderUpcoming(matches) {
+            const container = document.getElementById('upcoming-matches-container');
+            container.innerHTML = matches.map(m => `
+                <div class="card">
+                    <div class="match-grid">
+                        <div>
+                            <img src="${m.logo1 || 'https://i.ibb.co/3Y7yvHk/ball.png'}" class="team-logo"><br>
+                            <strong>${m.team1}</strong>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; margin-bottom: 5px;">ضد</div>
+                            <span style="font-size:0.8rem; opacity:0.8; display:block;">${m.date}</span>
+                            <span style="font-size:0.8rem; opacity:0.8; display:block; color:var(--yemen-red)">${m.time}</span>
+                        </div>
+                        <div>
+                            <img src="${m.logo2 || 'https://i.ibb.co/3Y7yvHk/ball.png'}" class="team-logo"><br>
+                            <strong>${m.team2}</strong>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderScorersTable(scorers) {
+            const container = document.getElementById('scorers-table');
+            const sorted = scorers.sort((a, b) => b.goals - a.goals);
+            let html = `<table><thead><tr><th>اللاعب</th><th>الفريق</th><th>الأهداف</th></tr></thead><tbody>`;
+            sorted.forEach(s => {
+                html += `<tr>
+                    <td>${s.name}</td>
+                    <td>${s.team}</td>
+                    <td style="font-weight:bold; color:var(--yemen-red)">${s.goals}</td>
+                </tr>`;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function renderSponsorsTrack(sponsors) {
+            const container = document.getElementById('sponsors-list');
+            container.innerHTML = sponsors.map(s => `
+                <img src="${s.logo || 'https://i.ibb.co/3Y7yvHk/ball.png'}" class="sponsor-img" alt="${s.name}" title="${s.name}">
+            `).join('');
+        }
+
+        // لوحة تحكم الإدارة
+        function renderAdminStandingsList(teams) {
+            const container = document.getElementById('admin-list-standings');
+            container.innerHTML = `<h4>الفرق المسجلة حالياً</h4>` + teams.map(t => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; flex-wrap: wrap; gap:10px;">
+                    <div>
+                        <strong>${t.name} (مجموعة ${t.group})</strong>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-edit" onclick="editStanding('${t.id}', '${t.name}', '${t.group}', ${t.p}, ${t.g}, ${t.pl}, ${t.w}, ${t.d}, ${t.l}, '${t.logo}')">تعديل ✏️</button>
+                        <button class="btn-delete" onclick="deleteStanding('${t.id}')">حذف ❌</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminUpcomingList(matches) {
+            const container = document.getElementById('admin-list-upcoming');
+            container.innerHTML = `<h4>المباريات المجدولة</h4>` + matches.map(m => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; flex-wrap: wrap; gap:10px;">
+                    <div><strong>${m.team1} ضد ${m.team2}</strong></div>
+                    <div class="admin-actions">
+                        <button class="btn-edit" onclick="editUpcoming('${m.id}', '${m.team1}', '${m.team2}', '${m.date}', '${m.time}', '${m.logo1}', '${m.logo2}')">تعديل ✏️</button>
+                        <button class="btn-delete" onclick="deleteUpcoming('${m.id}')">حذف ❌</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminFinishedList(matches) {
+            const container = document.getElementById('admin-list-finished');
+            container.innerHTML = `<h4>النتائج المسجلة</h4>` + matches.map(m => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; flex-wrap: wrap; gap:10px;">
+                    <div><strong>${m.team1} (${m.score1}) - (${m.score2}) ${m.team2}</strong></div>
+                    <div class="admin-actions">
+                        <button class="btn-edit" onclick="editFinished('${m.id}', '${m.team1}', '${m.score1}', '${m.team2}', '${m.score2}', '${m.timeline}')">تعديل ✏️</button>
+                        <button class="btn-delete" onclick="deleteFinished('${m.id}')">حذف ❌</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminScorersList(scorers) {
+            const container = document.getElementById('admin-list-scorers');
+            container.innerHTML = `<h4>قائمة الهدافين المسجلين</h4>` + scorers.map(s => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; flex-wrap: wrap; gap:10px;">
+                    <div><strong>${s.name} (${s.team}) - ${s.goals} أهداف</strong></div>
+                    <div class="admin-actions">
+                        <button class="btn-edit" onclick="editScorer('${s.id}', '${s.name}', '${s.team}', ${s.goals})">تعديل ✏️</button>
+                        <button class="btn-delete" onclick="deleteScorer('${s.id}')">حذف ❌</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminSponsorsList(sponsors) {
+            const container = document.getElementById('admin-list-sponsors');
+            container.innerHTML = `<h4>الرعاة المضافين</h4>` + sponsors.map(s => `
+                <div class="card" style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; flex-wrap: wrap; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${s.logo}" style="height:30px; object-fit:contain;">
+                        <strong>${s.name}</strong>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-delete" onclick="deleteSponsor('${s.id}')">حذف الراعي ❌</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // إطلاق الموقع والتهيئة
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-btn').innerText = savedTheme === 'dark' ? '🌙' : '☀️';
+            
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                loadRealTimeData();
+            }, 1500);
+        };
+
+    </script>
+</body>
+</html>
